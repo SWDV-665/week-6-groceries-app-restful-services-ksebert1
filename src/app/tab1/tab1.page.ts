@@ -1,7 +1,5 @@
 import { Component } from '@angular/core';
-import { toastController } from '@ionic/core';
-import { NavController, ToastController } from '@ionic/angular';
-import { AlertController } from '@ionic/angular';
+
 
 
 @Component({
@@ -41,16 +39,21 @@ addItem(){
   this.presentItemPrompt()
 }
 
+editItem(item,i){
+this.editItemPrompt(item,i)
+}
+
+
 removeItem(item,i){
   console.log("Removing Item - .", item,i)
   this.items.splice(i,1)
 }
 
- presentItemPrompt() {
-  const alert = document.createElement('ion-alert');
-  alert.cssClass = 'my-custom-class';
-  alert.header = 'Enter Item';
-  alert.inputs = [
+presentItemPrompt() {
+  const presentAlert = document.createElement('ion-alert');
+  presentAlert.cssClass = 'my-custom-class';
+  presentAlert.header = 'Enter Item';
+  presentAlert.inputs = [
      {
       name: 'brand',
       id: 'itemBrand',
@@ -75,7 +78,7 @@ removeItem(item,i){
     }
 
   ];
-  alert.buttons = [
+  presentAlert.buttons = [
     {
       text: 'Cancel',
       role: 'cancel',
@@ -90,11 +93,72 @@ removeItem(item,i){
         this.items.push(item)
       }
     }
-  ];
+  ]
 
-  document.body.appendChild(alert);
-  return alert.present();
+  document.body.appendChild(presentAlert);
+  return presentAlert.present();
 }
+
+  editItemPrompt(item,i) {
+      const editAlert = document.createElement('ion-alert');
+      editAlert.cssClass = 'my-custom-class';
+      editAlert.header = 'Enter Item';
+      editAlert.inputs = [
+         {
+          name: 'brand',
+          id: 'itemBrand',
+          value: item.brand
+         
+        },
+        {
+          name: 'size',
+          id: 'itemSize',
+          value: item.size
+        },
+        {
+          name: 'name',
+          id: 'itemName',
+          value: item.name
+        },
+        {
+          name: 'quantity',
+          placeholder: 'Enter amount to add',
+          type: 'number',
+          min: 1,
+          max: 999999999999,
+          value: item.quantity
+        }
+    
+      ]
+      editAlert.buttons = [
+        {
+          text: 'Cancel',
+          role: 'cancel',
+          cssClass: 'secondary',
+          handler: () => {
+            console.log('Confirm Cancel')
+          }
+        }, {
+          text: 'Ok',
+          handler: item => {
+            console.log('Confirm Ok')
+            this.items[i] = item;
+          }
+        }
+      ]
+
+      document.body.appendChild(editAlert);
+      return editAlert.present();
+    }
+
+        
+
+
+
+
+  
+
+
 
 
 
