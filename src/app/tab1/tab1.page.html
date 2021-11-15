@@ -12,11 +12,12 @@
       <ion-title size="large">Grocery</ion-title>
     </ion-toolbar>
   </ion-header>
+
   <ion-text>
-    <h2 class="ion-padding">List:</h2>
+  <h3 class="ion-text-center"  *ngIf="loadItems().length === 0">Your list is empty. <ion-icon name="sad-outline"></ion-icon></h3>
   </ion-text>
   <ion-list>
-    <ion-item-sliding *ngFor="let item of items; let i = index">
+    <ion-item-sliding *ngFor="let item of loadItems(); let i = index">
       <ion-item>
         <ion-label>
         <h2>{{item.name}}</h2>  

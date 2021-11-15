@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-
+import { GroceriesServiceService } from '../groceries-service.service';
 
 
 @Component({
@@ -7,33 +7,17 @@ import { Component } from '@angular/core';
   templateUrl: 'tab1.page.html',
   styleUrls: ['tab1.page.scss']
 })
+
+
 export class Tab1Page {
 
- title = "Grocery";
+ title = "Grocery List Items";
 
- items = [
-  {
-    brand: "Lactaid",
-    size: "Quart",
-    name: "2% Milk",
-    quantity: 3
-  },
-  {
-    brand: "L'Oven",
-    size: "loaf",
-    name: "12 Grain Wide Pan Bread",
-    quantity: 1
-  },
-  {
-    brand: "Earth Grown",
-    size: "14 oz.",
-    name: "Extra Firm Tofu",
-    quantity: 2
-  },
-]
+constructor(public dataService: GroceriesServiceService) {}
 
-constructor() {}
-
+loadItems(){
+  return this.dataService.getItems();
+}
 
 addItem(){
   this.presentItemPrompt()
@@ -46,8 +30,8 @@ this.editItemPrompt(item,i)
 
 removeItem(item,i){
   console.log("Removing Item - .", item,i)
-  this.items.splice(i,1)
-}
+  this.dataService.removeItem(i);
+} 
 
 presentItemPrompt() {
   const presentAlert = document.createElement('ion-alert');
@@ -90,7 +74,7 @@ presentItemPrompt() {
       text: 'Ok',
       handler: item => {
         console.log('Confirm Ok')
-        this.items.push(item)
+        this.dataService.addItem(item);
       }
     }
   ]
@@ -142,7 +126,7 @@ presentItemPrompt() {
           text: 'Ok',
           handler: item => {
             console.log('Confirm Ok')
-            this.items[i] = item;
+            this.dataService.editItem(item, i);
           }
         }
       ]
