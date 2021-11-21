@@ -43,6 +43,11 @@ export class GroceriesServiceService {
   this.items[i] = item;
  }
  
+shareItem(item){
+  console.log("Sharing Item - .", item)
+  this.shareItem(item)
+} 
+
   constructor() {   }
 
 }
