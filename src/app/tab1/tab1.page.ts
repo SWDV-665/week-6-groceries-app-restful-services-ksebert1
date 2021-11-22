@@ -7,8 +7,7 @@ import { SocialSharing } from '@ionic-native/social-sharing/ngx';
 @Component({
   selector: 'app-tab1',
   templateUrl: 'tab1.page.html',
-  styleUrls: ['tab1.page.scss'],
-  providers: [SocialSharing]
+  styleUrls: ['tab1.page.scss']
 })
 
 
