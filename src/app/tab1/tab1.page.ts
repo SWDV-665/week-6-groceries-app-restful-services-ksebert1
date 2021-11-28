@@ -30,6 +30,7 @@ this.InputDialogServiceService.showPrompt(item,i)
 }
 
  shareItem(item){
+  console.log("Sharing item: ", item)
   var message = "Grocery Item: " + "Brand: "+ item.brand + "Size: "+ item.size + "Name: "+ item.name + "Quantity: "+ item.quantity ;
   var subject = "Shared via Groceries app";  
   this.socialSharing.share(message, subject).then(() => {
