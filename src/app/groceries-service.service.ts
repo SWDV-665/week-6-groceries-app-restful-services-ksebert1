@@ -1,12 +1,13 @@
 import { Injectable } from '@angular/core';
-//import {Observable} from 'rxjs/Observable';
-import { from, Observable, Observer, Subject } from 'rxjs';
-import { HttpClient} from '@angular/common/http';
-import { MapType } from '@angular/compiler';
-import { NgModule } from '@angular/core';
-import { BrowserModule } from '@angular/platform-browser';
+import { of, from, Observable, Observer, Subject } from 'rxjs';
+import { HttpClient, HttpParams, HttpHeaders} from '@angular/common/http';
 import { HttpClientModule } from '@angular/common/http';
-import {map, catchError} from 'rxjs/operators'
+import {map, catchError, tap} from 'rxjs/operators'
+import { ArrayType } from '@angular/compiler';
+import { Item } from './item';
+import { MessageService } from './message.service';
+
+
 
 @Injectable({
   providedIn: 'root'
@@ -14,71 +15,126 @@ import {map, catchError} from 'rxjs/operators'
 
 export class GroceriesServiceService {
 
-  items: any = [];
+  // items: any = [];
 
-  dataChanged$: Observable<boolean>;
+  httpOptions = {
+    headers: new HttpHeaders({'Content-Type': 'application/json'})
+  };
 
-  private dataChangeSubject: Subject<boolean>;
+  // dataChanged$: Observable<boolean>;
+
+  // private dataChangeSubject: Subject<boolean>;
 
   baseURL = "http://localhost:8080";
 
-  constructor(public http: HttpClient){
-    console.log("Hello GroceriesServiceProvider Provider")
-    this.dataChangeSubject = new Subject<boolean>();
-    this.dataChanged$ =  this.dataChangeSubject.asObservable();      
-  }
-
-  getItems(): Observable<any> {
-    return this.http.get(this.baseURL + '/api/groceries').pipe(
-     map(this.extractData),
-     catchError(this.handleError) 
-    );
-  }
-
-  // getItems(): Observable<object[]> {
-  //   let response = this.http.get(this.baseURL + '/api/groceries').map((response: Response) => response.json());
-  //   return response;
-  //   return this.http.get(this.baseURL + '/api/groceries').pipe(
-  //    map<Observable<object>(this.extractData),
-  //    catchError(this.handleError) 
-  //   );
-  // }
-
-
-  private extractData(res:Response){
-    let body = res;
-    return body || {};
-  }
+  constructor(public http: HttpClient,
+              public messageService: MessageService){
   
-  private handleError(error: Response | any){
-    let errMsg: string;
-    if (error instanceof Response){
-      const err = error || '';
-      errMsg = `${error.status}- ${error.statusText || ''} ${err}` ;
-    } else {
-      errMsg = error.message ? error.message : error.toString();
-    }
-    console.error(errMsg);
-    return Observable.throw(errMsg);
   }
 
- removeItem(i){
-  this.items.splice(i,1);
- }
+  pageRefresh(){
+    window.location.reload();
+  }
 
- addItem(item){
-  this.items.push(item);
- }
+  getItems(): Observable<Item[]>{
+    return this.http.get<Item[]>(this.baseURL + '/api/groceries')
+    .pipe(
+      tap(_ => this.log('fetched Items')),
+      catchError(this.handleError<Item[]>('getItems, []')))
+  }
 
- editItem(item, i){
-  this.items[i] = item;
- }
- 
-shareItem(item){
+    /** POST: add a new Item to the server */
+  addItem(item: Item){
+    console.log("Adding: " + item);
+    this.http.post(this.baseURL + '/api/groceries', item, this.httpOptions)
+    .subscribe(
+        (val) => {
+            console.log("POST call successful value returned in body", 
+                        val);
+        },
+        response => {
+            console.log("POST call in error", response);
+        },
+        () => {
+            console.log("The POST observable is now completed.");
+            this.pageRefresh();
+        });
+
+
+
+
+  }
+
+  /** DELETE: delete the Item from the server */
+  deleteItem(id: string) {
+    console.log("Deleting Item with ID: " + id)
+    const url = this.baseURL + '/api/groceries/' + id;
+    this.http.delete(this.baseURL + '/api/groceries/' + id)
+    .subscribe(
+        (val) => {
+            console.log("DELETE call successful value returned in body", 
+                        val);
+        },
+        response => {
+            console.log("DELETE call in error", response);
+        },
+        () => {
+            console.log("The DELETE observable is now completed.");
+            this.pageRefresh();
+        });
+}
+
+
+
+  /** PUT: update the Item on the server */
+  updateItem(item: Item,id: string) {
+    console.log("In update item: " + JSON.stringify(item) + id);
+     this.http.put(this.baseURL + '/api/groceries/'+ id, item, this.httpOptions)
+      .subscribe(
+        val => {
+            console.log("PUT call successful value returned in body", 
+                        val);
+        },
+        response => {
+            console.log("PUT call in error", response);
+        },
+        () => {
+            console.log("The PUT observable is now completed.");
+            this.pageRefresh();
+        }
+       ); 
+  }
+
+/**
+   * Handle Http operation that failed.
+   * Let the app continue.
+   * @param operation - name of the operation that failed
+   * @param result - optional value to return as the observable result
+   */
+
+  private handleError<T>(operation = 'operation', result?: T) {
+    return (error: any): Observable<T> => {
+
+      // TODO: send the error to remote logging infrastructure
+      console.error(error); // log to console instead
+
+      // TODO: better job of transforming error for user consumption
+      this.log(`${operation} failed: ${error.message}`);
+
+      // Let the app keep running by returning an empty result.
+      return of(result as T);
+    };
+  }
+   
+
+shareItem(item: ArrayType){
   console.log("Sharing Item - .", item)
   this.shareItem(item)
 } 
 
-  //constructor() {   }
-
+  // constructor() {   }
+  /** Log a Groceries Service message with the MessageService */
+  private log(message: string) {
+    this.messageService.add(`Groceries-Service: ${message}`);
+  }
 }
