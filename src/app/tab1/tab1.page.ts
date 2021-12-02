@@ -1,7 +1,9 @@
-import { Component } from '@angular/core';
+import { Component, OnInit} from '@angular/core';
+import { Item } from '../item';
 import { GroceriesServiceService } from '../groceries-service.service';
 import { InputDialogServiceService } from '../input-dialog-service.service';
 import { SocialSharing } from '@ionic-native/social-sharing/ngx';
+
 
 
 @Component({
@@ -11,30 +13,43 @@ import { SocialSharing } from '@ionic-native/social-sharing/ngx';
 })
 
 
-export class Tab1Page {
+export class Tab1Page implements OnInit{
+  items: Item[] = [];
+  
+  title = "Grocery Items";
+    // errorMessage = ''
 
- title = "Grocery List Items";
+  constructor(public dataService: GroceriesServiceService, public InputDialogServiceService: InputDialogServiceService, private socialSharing: SocialSharing ) {}
 
-constructor(public dataService: GroceriesServiceService, public InputDialogServiceService: InputDialogServiceService, private socialSharing: SocialSharing ) {}
+  ngOnInit(): void {
+    this.loadItems();
+    
+  }
 
-loadItems(){
-  return this.dataService.getItems();
-}
+  loadItems(){
+    this.dataService.getItems()
+    .subscribe(items => this.items = items);   
+  }
 
-addItem(){
-  this.InputDialogServiceService.showPrompt()
-}
+  addItem(){
 
-editItem(item,i){
-this.InputDialogServiceService.showPrompt(item,i)
-}
+    this.InputDialogServiceService.showPrompt()
+   
 
- shareItem(item){
+  }
+
+  editItem(item: Item): void {
+    console.log("Sending: " + JSON.stringify(item))
+    this.InputDialogServiceService.editItemPrompt(item)
+    this.dataService.getItems()
+  }
+
+ shareItem(item: any){
   console.log("Sharing item: ", item)
   var message = "Grocery Item: " + "Brand: "+ item.brand + "Size: "+ item.size + "Name: "+ item.name + "Quantity: "+ item.quantity ;
   var subject = "Shared via Groceries app";  
   this.socialSharing.share(message, subject).then(() => {
-    // Sharing via email is possible
+    //If Sharing via email is possible
     console.log('Shared Successfully')
   }).catch((error) => {
       // Error!
@@ -44,9 +59,12 @@ this.InputDialogServiceService.showPrompt(item,i)
   }
 
 
-removeItem(item,i){
-  console.log("Removing Item - .", item,i)
-  this.dataService.removeItem(i);
+removeItem(id: string){
+  console.log("Removing Item - " +  id)
+  this.dataService.deleteItem(id);
+  this.dataService.getItems();
+  
+  
 } 
 
 
